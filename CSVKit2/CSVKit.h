@@ -56,7 +56,7 @@
 
 #import <Foundation/NSObject.h>
 
-@class NSArray, NSData, NSDictionary, NSError, NSString;
+@class NSArray, NSData, NSDictionary, NSError, NSString, CSVParserContext;
 
 extern NSString * const CSVErrorDomain;
 extern NSString * const CSVLineNumberKey;
@@ -87,13 +87,9 @@ typedef struct
 extern const CSVDialect CSVExcelDialect;    // Excel-generated CSV data
 extern const CSVDialect CSVExcelTabDialect; // Excel-generated TAB-delimited data
 
-typedef struct CSVParserContext CSVParserContext;
-
 @interface CSVParser : NSObject
-{
-@protected
-    CSVParserContext *context;
-}
+
+@property (strong, nonatomic) CSVParserContext *context;
 
 + (id)parser;
 + (id)parserWithDialect:(const CSVDialect *)dialect;
@@ -138,9 +134,6 @@ typedef struct CSVParserContext CSVParserContext;
 
 @interface CSVObjectParser : CSVParser
 {
-@private
-    Class _objectClass;
-    NSArray *_propertyNames;
 }
 
 @property (nonatomic,retain) Class objectClass;
