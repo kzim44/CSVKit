@@ -37,6 +37,9 @@ extern NSString * const CSVErrorDomain;
 extern NSString * const CSVLineNumberKey;
 extern NSString * const CSVFieldNumberKey;
 
+typedef void (^RowBlock)(NSArray *row, NSUInteger rowIndex, BOOL *stop);
+typedef void (^FieldBlock)(id value, NSUInteger index, NSUInteger rowIndex, BOOL *stop);
+
 typedef enum
 {
     CSVQuoteStyleNone = 0,              // No special quote processing
@@ -75,25 +78,25 @@ typedef struct CSVParserContext CSVParserContext;
 
 #pragma mark Field Parsing
 
-- (BOOL)parseFieldsFromData:(NSData *)data block:(void (^)(id value, NSUInteger index, BOOL *stop))block;
-- (BOOL)parseFieldsFromData:(NSData *)data block:(void (^)(id value, NSUInteger index, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseFieldsFromData:(NSData *)data block:(FieldBlock)block;
+- (BOOL)parseFieldsFromData:(NSData *)data block:(FieldBlock)block error:(NSError **)error;
 
-- (BOOL)parseFieldsFromString:(NSString *)string block:(void (^)(id value, NSUInteger index, BOOL *stop))block;
-- (BOOL)parseFieldsFromString:(NSString *)string block:(void (^)(id value, NSUInteger index, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseFieldsFromString:(NSString *)string block:(FieldBlock)block;
+- (BOOL)parseFieldsFromString:(NSString *)string block:(FieldBlock)block error:(NSError **)error;
 
-- (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(void (^)(id value, NSUInteger index, BOOL *stop))block;
-- (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(void (^)(id value, NSUInteger index, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(FieldBlock)block;
+- (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(FieldBlock)block error:(NSError **)error;
 
 #pragma mark Row Parsing
 
-- (BOOL)parseRowsFromData:(NSData *)data block:(void (^)(NSArray *row, BOOL *stop))block;
-- (BOOL)parseRowsFromData:(NSData *)data block:(void (^)(NSArray *row, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseRowsFromData:(NSData *)data block:(RowBlock)block;
+- (BOOL)parseRowsFromData:(NSData *)data block:(RowBlock)block error:(NSError **)error;
 
-- (BOOL)parseRowsFromString:(NSString *)string block:(void (^)(NSArray *row, BOOL *stop))block;
-- (BOOL)parseRowsFromString:(NSString *)string block:(void (^)(NSArray *row, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseRowsFromString:(NSString *)string block:(RowBlock)block;
+- (BOOL)parseRowsFromString:(NSString *)string block:(RowBlock)block error:(NSError **)error;
 
-- (BOOL)parseRowsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(void (^)(NSArray *row, BOOL *stop))block;
-- (BOOL)parseRowsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(void (^)(NSArray *row, BOOL *stop))block error:(NSError **)error;
+- (BOOL)parseRowsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(RowBlock)block;
+- (BOOL)parseRowsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(RowBlock)block error:(NSError **)error;
 
 #pragma mark Convenience Methods
 

@@ -639,13 +639,13 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 #pragma mark Field Parsing
 
 - (BOOL)parseFieldsFromData:(NSData *)data
-                      block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                      block:(FieldBlock)block
 {
     return [self parseFieldsFromData:data block:block error:nil];
 }
 
 - (BOOL)parseFieldsFromData:(NSData *)data
-                      block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                      block:(FieldBlock)block
                       error:(NSError **)error
 {
     const unsigned char * const bytes = (const unsigned char *)[data bytes];
@@ -653,13 +653,13 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 }
 
 - (BOOL)parseFieldsFromString:(NSString *)string
-                        block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                        block:(FieldBlock)block
 {
     return [self parseFieldsFromString:string block:block error:nil];
 }
 
 - (BOOL)parseFieldsFromString:(NSString *)string
-                        block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                        block:(FieldBlock)block
                         error:(NSError **)error
 {
     // TODO: Use an intermediate data buffer for the character encoding conversion.
@@ -672,14 +672,14 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string
                            length:(NSUInteger)length
-                            block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                            block:(FieldBlock)block
 {
     return [self parseFieldsFromUTF8String:string length:length block:block error:nil];
 }
 
 - (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string
                            length:(NSUInteger)length
-                            block:(void (^)(id value, NSUInteger index, BOOL *stop))block
+                            block:(FieldBlock)block
                             error:(NSError **)error
 {
     NSParameterAssert(string != NULL);
@@ -690,12 +690,12 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
         if (index != NSUIntegerMax)
         {
             id object = csv_parser_field_object(buffer, type);
-            block(object, index, stop);
+            block(object, index, context->lineNumber, stop);
             CFRelease(object);
         }
         else
         {
-            block(nil, NSUIntegerMax, stop);
+            block(nil, NSUIntegerMax, context->lineNumber, stop);
         }
     };
 
@@ -712,13 +712,13 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 #pragma mark Row Parsing
 
 - (BOOL)parseRowsFromData:(NSData *)data
-                    block:(void (^)(NSArray *, BOOL *))block
+                    block:(RowBlock)block
 {
     return [self parseRowsFromData:data block:block error:nil];
 }
 
 - (BOOL)parseRowsFromData:(NSData *)data
-                    block:(void (^)(NSArray *, BOOL *))block
+                    block:(RowBlock)block
                     error:(NSError **)error
 {
     const unsigned char * const bytes = (const unsigned char *)[data bytes];
@@ -726,13 +726,13 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 }
 
 - (BOOL)parseRowsFromString:(NSString *)string
-                      block:(void (^)(NSArray *row, BOOL *stop))block
+                      block:(RowBlock)block
 {
     return [self parseRowsFromString:string block:block error:nil];
 }
 
 - (BOOL)parseRowsFromString:(NSString *)string
-                      block:(void (^)(NSArray *row, BOOL *stop))block
+                      block:(RowBlock)block
                       error:(NSError **)error
 {
     // TODO: Use an intermediate data buffer for the character encoding conversion.
@@ -744,14 +744,14 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (BOOL)parseRowsFromUTF8String:(const unsigned char *)string
                          length:(NSUInteger)length
-                          block:(void (^)(NSArray *row, BOOL *stop))block
+                          block:(RowBlock)block
 {
     return [self parseRowsFromUTF8String:string length:length block:block error:nil];
 }
 
 - (BOOL)parseRowsFromUTF8String:(const unsigned char *)string
                          length:(NSUInteger)length
-                          block:(void (^)(NSArray *row, BOOL *stop))block
+                          block:(RowBlock)block
                           error:(NSError **)error
 {
     NSParameterAssert(string != NULL);
@@ -759,7 +759,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
     CFMutableArrayRef row = CFArrayCreateMutable(NULL, 8, &kCFTypeArrayCallBacks);
 
-    BOOL success = [self parseFieldsFromUTF8String:string length:length block:^(id value, NSUInteger index, BOOL *stop) {
+    BOOL success = [self parseFieldsFromUTF8String:string length:length block:^(id value, NSUInteger index, NSUInteger rowIndex, BOOL *stop) {
         if (index != NSUIntegerMax)
         {
             CFArrayAppendValue(row, value);
@@ -767,7 +767,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
         else
         {
             CFArrayRef rowCopy = CFArrayCreateCopy(NULL, (CFArrayRef)row);
-            block((NSArray *)rowCopy, stop);
+            block((NSArray *)rowCopy, rowIndex, stop);
             CFRelease(rowCopy);
             CFArrayRemoveAllValues(row);
         }
@@ -814,7 +814,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 {
     CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
 
-    BOOL success = [self parseRowsFromUTF8String:string length:length block:^(NSArray *row, BOOL *stop) {
+    BOOL success = [self parseRowsFromUTF8String:string length:length block:^(NSArray *row, NSUInteger rowIndex, BOOL *stop) {
         CFArrayAppendValue(array, row);
     } error:error];
 

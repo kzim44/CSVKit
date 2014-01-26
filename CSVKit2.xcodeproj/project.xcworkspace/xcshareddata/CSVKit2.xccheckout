@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2BCCC09C-D0CC-4EEC-8FAD-BB6033FDF502</string>
+	<key>IDESourceControlProjectName</key>
+	<string>CSVKit2</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>6BF2CD6E-A49D-4154-ABD0-E6CE8F52206D</key>
+		<string>ssh://github.com/kzim44/CSVKit.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>CSVKit2/CSVKit2.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>6BF2CD6E-A49D-4154-ABD0-E6CE8F52206D</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>ssh://github.com/kzim44/CSVKit.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>6BF2CD6E-A49D-4154-ABD0-E6CE8F52206D</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>6BF2CD6E-A49D-4154-ABD0-E6CE8F52206D</string>
+			<key>IDESourceControlWCCName</key>
+			<string>CSVKit</string>
+		</dict>
+	</array>
+</dict>
+</plist>
