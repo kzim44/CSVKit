@@ -53,6 +53,9 @@
     XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
 }
 
+
+#define MASTER_LAST_ROW 18356
+
 -(void)testCsvFile {
     NSString *masterCsv = [[NSBundle bundleForClass:[self class]] pathForResource:@"Master" ofType:@".csv"];
     
@@ -64,10 +67,17 @@
                                     block:^(NSArray *row, NSUInteger rowIndex, BOOL *stop) {
 
                                         lastRow = rowIndex;
+                                        
+                                        if (rowIndex == MASTER_LAST_ROW) {
+                                            XCTAssertEqualObjects(row[1], @"zuninmi01", @"Unexpected field value.");
+                                        }
+                                        
+                                        
+                                        
     }
                                     error:&error];
     XCTAssertNil(error, @"%@", error);
-    XCTAssertTrue(lastRow == 18356, @"Wrong number of rows");
+    XCTAssertTrue(lastRow == MASTER_LAST_ROW, @"Wrong number of rows");
 }
 
 //- (void)testErrorDetails
