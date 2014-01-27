@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A1BFD8218960F2D0007CEEA /* Master.csv in Resources */ = {isa = PBXBuildFile; fileRef = 0A1BFD8118960F2D0007CEEA /* Master.csv */; };
 		0AC119C718944BB300CD42E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AC119C618944BB300CD42E2 /* Foundation.framework */; };
 		0AC119D518944BB300CD42E2 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AC119D418944BB300CD42E2 /* XCTest.framework */; };
 		0AC119D618944BB300CD42E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AC119C618944BB300CD42E2 /* Foundation.framework */; };
@@ -41,6 +42,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0A1BFD8118960F2D0007CEEA /* Master.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Master.csv; sourceTree = "<group>"; };
 		0AC119C318944BB300CD42E2 /* libCSVKit2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCSVKit2.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AC119C618944BB300CD42E2 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		0AC119CA18944BB300CD42E2 /* CSVKit2-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CSVKit2-Prefix.pch"; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 		0AC119DD18944BB300CD42E2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				0A1BFD8118960F2D0007CEEA /* Master.csv */,
 				0AC119DE18944BB300CD42E2 /* CSVKit2Tests-Info.plist */,
 				0AC119DF18944BB300CD42E2 /* InfoPlist.strings */,
 			);
@@ -212,6 +215,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A1BFD8218960F2D0007CEEA /* Master.csv in Resources */,
 				0AC119E118944BB300CD42E2 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

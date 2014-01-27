@@ -779,6 +779,27 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 #pragma mark Row Parsing
 
+-(BOOL)parseRowsFromPath:(NSString*)csvPath
+                   block:(RowBlock)block
+{
+    return [self parseRowsFromPath:csvPath block:block error:nil];
+}
+
+-(BOOL)parseRowsFromPath:(NSString*)csvPath
+                   block:(RowBlock)block
+                   error:(NSError **)error
+{
+    NSData *csvData = [NSData dataWithContentsOfFile:csvPath];
+    
+    if (![csvData length]) {
+        @throw([NSException exceptionWithName:@"CSVFileIsEmpty" reason:@"CSV file is empty" userInfo:nil]);
+    }
+    
+    CSVParser *csvParser = [CSVParser parserWithDialect:&CSVExcelDialect];
+    
+    return [csvParser parseRowsFromData:csvData block:block error:error];
+}
+
 - (BOOL)parseRowsFromData:(NSData *)data
                     block:(RowBlock)block
 {

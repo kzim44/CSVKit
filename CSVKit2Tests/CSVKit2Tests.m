@@ -28,6 +28,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "CSVKit.h"
 
 @interface CSVKit2Tests : XCTestCase
 
@@ -50,6 +51,23 @@
 - (void)testExample
 {
     XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+}
+
+-(void)testCsvFile {
+    NSString *masterCsv = [[NSBundle bundleForClass:[self class]] pathForResource:@"Master" ofType:@".csv"];
+    
+    NSError *error = nil;
+    
+    NSUInteger __block lastRow = 0;
+    
+    [[CSVParser parser] parseRowsFromPath:masterCsv
+                                    block:^(NSArray *row, NSUInteger rowIndex, BOOL *stop) {
+
+                                        lastRow = rowIndex;
+    }
+                                    error:&error];
+    XCTAssertNil(error, @"%@", error);
+    XCTAssertTrue(lastRow == 18356, @"Wrong number of rows");
 }
 
 //- (void)testErrorDetails

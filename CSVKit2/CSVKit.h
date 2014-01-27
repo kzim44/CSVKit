@@ -109,6 +109,8 @@ extern const CSVDialect CSVExcelTabDialect; // Excel-generated TAB-delimited dat
 - (BOOL)parseFieldsFromUTF8String:(const unsigned char *)string length:(NSUInteger)length block:(FieldBlock)block error:(NSError **)error;
 
 #pragma mark Row Parsing
+-(BOOL)parseRowsFromPath:(NSString*)csvPath block:(RowBlock)block;
+-(BOOL)parseRowsFromPath:(NSString*)csvPath block:(RowBlock)block error:(NSError **)error;
 
 - (BOOL)parseRowsFromData:(NSData *)data block:(RowBlock)block;
 - (BOOL)parseRowsFromData:(NSData *)data block:(RowBlock)block error:(NSError **)error;
