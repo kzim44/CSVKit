@@ -65,13 +65,12 @@ extern NSString * const CSVFieldNumberKey;
 typedef void (^RowBlock)(NSArray *row, NSUInteger rowIndex, BOOL *stop);
 typedef void (^FieldBlock)(id value, NSUInteger index, NSUInteger rowIndex, BOOL *stop);
 
-typedef enum
-{
+typedef NS_ENUM(unsigned int, CSVQuoteStyle) {
     CSVQuoteStyleNone = 0,              // No special quote processing
     CSVQuoteStyleMinimal,               // Only quote fields with special characters
     CSVQuoteStyleAll,                   // Quote all fields
     CSVQuoteStyleNonNumeric,            // Quote non-numeric fields; unquoted fields are floats
-} CSVQuoteStyle;
+};
 
 typedef struct
 {
@@ -91,11 +90,11 @@ extern const CSVDialect CSVExcelTabDialect; // Excel-generated TAB-delimited dat
 
 @property (strong, nonatomic) CSVParserContext *context;
 
-+ (id)parser;
-+ (id)parserWithDialect:(const CSVDialect *)dialect;
++ (instancetype)parser;
++ (instancetype)parserWithDialect:(const CSVDialect *)dialect;
 
-- (id)init;
-- (id)initWithDialect:(const CSVDialect *)dialect;
+- (instancetype)init;
+- (instancetype)initWithDialect:(const CSVDialect *)dialect NS_DESIGNATED_INITIALIZER;
 
 #pragma mark Field Parsing
 
@@ -141,8 +140,8 @@ extern const CSVDialect CSVExcelTabDialect; // Excel-generated TAB-delimited dat
 @property (nonatomic,retain) Class objectClass;
 @property (nonatomic,retain) NSArray *propertyNames;
 
-+ (id)parserWithDialect:(const CSVDialect *)dialect classClass:(Class)objectClass propertyNames:(NSArray *)propertyNames;
-- (id)initWithDialect:(const CSVDialect *)dialect objectClass:(Class)objectClass propertyNames:(NSArray *)propertyNames;
++ (instancetype)parserWithDialect:(const CSVDialect *)dialect classClass:(Class)objectClass propertyNames:(NSArray *)propertyNames;
+- (instancetype)initWithDialect:(const CSVDialect *)dialect objectClass:(Class)objectClass propertyNames:(NSArray *)propertyNames NS_DESIGNATED_INITIALIZER;
 
 #pragma mark Object Parsing
 

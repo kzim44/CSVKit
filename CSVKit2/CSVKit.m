@@ -86,8 +86,7 @@
 #define CSV_MAX_FIELD_LENGTH    (128UL * 1024UL)
 #define CSV_DEFAULT_BUFFER_SIZE (4096UL)
 
-typedef enum
-{
+typedef NS_ENUM(unsigned int, CSVParserState) {
     CSVParserStateStartRecord,
     CSVParserStateStartField,
     CSVParserStateEscapedChar,
@@ -96,13 +95,12 @@ typedef enum
     CSVParserStateEscapeInQuotedField,
     CSVParserStateQuoteInQuotedField,
     CSVParserStateEatCRLF,
-} CSVParserState;
+};
 
-typedef enum
-{
+typedef NS_ENUM(unsigned int, CSVFieldType) {
     CSVFieldTypeString,
     CSVFieldTypeNumber,
-} CSVFieldType;
+};
 
 enum
 {
@@ -113,98 +111,7 @@ enum
     CSVManagedBufferLocationMask = CSVManagedBufferOnStack | CSVManagedBufferOnHeap,
 };
 
-//typedef struct
-//{
-//    unsigned char * bytes;
-//    size_t          capacity;
-//    size_t          length;
-//    NSUInteger      flags;
-//} CSVManagedBuffer;
-
-//@interface CSVManagedBuffer : NSObject
-//
-//@property (strong, nonatomic) NSMutableData *bytes;
-//
-//@end
-//
-//@implementation CSVManagedBuffer
-//
-//- (id)init
-//{
-//    self = [super init];
-//    if (self) {
-//        _bytes = [NSMutableData new];
-//    }
-//    return self;
-//}
-//
-//-(void) setEmpty {
-//    _bytes
-//}
-//
-//static void csv_buffer_stack(CSVManagedBuffer * const buffer, unsigned char *ptr, size_t size)
-//{
-//    csv_buffer_free(buffer);
-//    buffer->bytes    = ptr;
-//    buffer->capacity = size;
-//    buffer->length   = 0UL;
-//    buffer->flags    = (buffer->flags & ~CSVManagedBufferLocationMask) | CSVManagedBufferOnStack;
-//}
-//
-//static unsigned char * csv_buffer_grow(CSVManagedBuffer * const buffer)
-//{
-//    if (buffer->capacity > 0)
-//    {
-//        // We can't grow beyond INT_MAX capacity.
-//        if (CSV_UNLIKELY(buffer->capacity > INT_MAX / 2))
-//            return NULL;
-//        
-//        buffer->capacity *= 2;
-//    }
-//    else
-//    {
-//        // New buffers default to the heap.
-//        buffer->capacity = CSV_DEFAULT_BUFFER_SIZE;
-//        buffer->flags    = (buffer->flags & ~CSVManagedBufferLocationMask) | CSVManagedBufferOnHeap;
-//    }
-//    
-//    // Stack-based buffers are always converted to heap-based buffers.
-//    if (buffer->flags & CSVManagedBufferOnStack)
-//    {
-//        unsigned char *ptr = malloc(buffer->capacity);
-//        if (CSV_UNLIKELY(ptr == NULL))
-//            return NULL;
-//        
-//        buffer->bytes = memcpy(ptr, buffer->bytes, buffer->length);
-//        buffer->flags = (buffer->flags & ~CSVManagedBufferLocationMask) | CSVManagedBufferOnHeap;
-//    }
-//    
-//    // Heap-based buffers are reallocated to the new size.
-//    else if (buffer->flags & CSVManagedBufferOnHeap)
-//    {
-//        buffer->bytes = reallocf(buffer->bytes, buffer->capacity);
-//    }
-//    
-//    return buffer->bytes;
-//}
-//
-//
-//@end
-
-
 typedef void (^CSVFieldBlock)(NSUInteger index, NSData *buffer, CSVFieldType type, BOOL *stop);
-
-//struct CSVParserContext
-//{
-//    const CSVDialect *  dialect;        // Current parsing dialect
-//    CSVParserState      state;          // Current parser state
-//    CSVManagedBuffer    field;          // Current field buffer
-//    CSVFieldType        fieldType;      // Current field type
-//    NSUInteger          fieldNumber;    // Current field number
-//    NSUInteger          lineNumber;     // Source text line number
-//    CSVFieldBlock       fieldBlock;     // Field handler block
-//    NSError *           error;          // Parsing error
-//};
 
 @interface CSVParserContext : NSObject
 
@@ -220,7 +127,7 @@ typedef void (^CSVFieldBlock)(NSUInteger index, NSData *buffer, CSVFieldType typ
 
 @implementation CSVParserContext
 
-- (id)init
+- (instancetype)init
 {
     self = [super init];
     if (self) {
@@ -274,14 +181,12 @@ static void csv_error(CSVParserContext *context, NSString *format, ...)
         NSString *description = [[NSString alloc] initWithFormat:format arguments:args];
         va_end(args);
 
-        NSNumber *lineNumber = [NSNumber numberWithUnsignedLong:context.lineNumber];
-        NSNumber *fieldNumber = [NSNumber numberWithUnsignedLong:context.fieldNumber];
+        NSNumber *lineNumber = @(context.lineNumber);
+        NSNumber *fieldNumber = @(context.fieldNumber);
 
-        NSDictionary *details = [NSDictionary dictionaryWithObjectsAndKeys:
-                                 description, NSLocalizedDescriptionKey,
-                                 lineNumber, CSVLineNumberKey,
-                                 fieldNumber, CSVFieldNumberKey,
-                                 nil];
+        NSDictionary *details = @{NSLocalizedDescriptionKey: description,
+                                 CSVLineNumberKey: lineNumber,
+                                 CSVFieldNumberKey: fieldNumber};
 
         context.error = [NSError errorWithDomain:CSVErrorDomain
                                              code:-1
@@ -321,11 +226,6 @@ static id csv_parser_field_object(const NSData *buffer, CSVFieldType type)
     return object;
 }
 
-//static void csv_parser_free(CSVParserContext *context)
-//{
-//    context.field.length = 0;
-//}
-
 static int csv_parser_add_field(CSVParserContext *context)
 {
     BOOL stop = NO;
@@ -350,12 +250,6 @@ static int csv_parser_add_char(CSVParserContext *context, unsigned char c)
         csv_error(context, @"Field length exceeds limit (%lu)", CSV_MAX_FIELD_LENGTH);
         return -1;
     }
-
-//    if (CSV_UNLIKELY((buffer.length == buffer.capacity) && !csv_buffer_grow(buffer)))
-//    {
-//        csv_error(context, @"Failed to grow field buffer beyond %lu bytes", buffer->capacity);
-//        return -1;
-//    }
 
     [buffer appendBytes:&c length:1];
 
@@ -656,22 +550,22 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 @implementation CSVParser
 
-+ (id)parser
++ (instancetype)parser
 {
     return [self parserWithDialect:nil];
 }
 
-+ (id)parserWithDialect:(const CSVDialect *)dialect
++ (instancetype)parserWithDialect:(const CSVDialect *)dialect
 {
     return [[self alloc] initWithDialect:dialect];
 }
 
-- (id)init
+- (instancetype)init
 {
     return [self initWithDialect:nil];
 }
 
-- (id)initWithDialect:(const CSVDialect *)dialect
+- (instancetype)initWithDialect:(const CSVDialect *)dialect
 {
     // Default to the Excel dialect.
     if (dialect == nil)
@@ -688,22 +582,10 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
         }
 
         _context.dialect = dialect;
-
-        //unsigned char fieldStackBuffer[CSV_DEFAULT_BUFFER_SIZE];
     }
 
     return self;
 }
-
-//- (void)dealloc
-//{
-//    if (context)
-//    {
-//        csv_parser_free(context);
-//        context = NULL;
-//    }
-//    [super dealloc];
-//}
 
 #pragma mark Field Parsing
 
@@ -717,8 +599,8 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
                       block:(FieldBlock)block
                       error:(NSError **)error
 {
-    const unsigned char * const bytes = (const unsigned char *)[data bytes];
-    return [self parseFieldsFromUTF8String:bytes length:[data length] block:block error:error];
+    const unsigned char * const bytes = (const unsigned char *)data.bytes;
+    return [self parseFieldsFromUTF8String:bytes length:data.length block:block error:error];
 }
 
 - (BOOL)parseFieldsFromString:(NSString *)string
@@ -733,7 +615,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 {
     // TODO: Use an intermediate data buffer for the character encoding conversion.
 
-    return [self parseFieldsFromUTF8String:(const unsigned char *)[string UTF8String]
+    return [self parseFieldsFromUTF8String:(const unsigned char *)string.UTF8String
                                     length:[string lengthOfBytesUsingEncoding:NSUTF8StringEncoding]
                                      block:block
                                      error:error];
@@ -791,7 +673,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 {
     NSData *csvData = [NSData dataWithContentsOfFile:csvPath];
     
-    if (![csvData length]) {
+    if (!csvData.length) {
         @throw([NSException exceptionWithName:@"CSVFileIsEmpty" reason:@"CSV file is empty" userInfo:nil]);
     }
     
@@ -810,8 +692,8 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
                     block:(RowBlock)block
                     error:(NSError **)error
 {
-    const unsigned char * const bytes = (const unsigned char *)[data bytes];
-    return [self parseRowsFromUTF8String:bytes length:[data length] block:block error:error];
+    const unsigned char * const bytes = (const unsigned char *)data.bytes;
+    return [self parseRowsFromUTF8String:bytes length:data.length block:block error:error];
 }
 
 - (BOOL)parseRowsFromString:(NSString *)string
@@ -826,7 +708,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 {
     // TODO: Use an intermediate data buffer for the character encoding conversion.
 
-    return [self parseRowsFromUTF8String:(const unsigned char *)[string UTF8String]
+    return [self parseRowsFromUTF8String:(const unsigned char *)string.UTF8String
                                   length:[string lengthOfBytesUsingEncoding:NSUTF8StringEncoding]
                                    block:block error:error];
 }
@@ -873,8 +755,8 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (NSArray *)rowsFromData:(NSData *)data error:(NSError **)error
 {
-    const unsigned char * const bytes = (const unsigned char *)[data bytes];
-    return [self rowsFromUTF8String:bytes length:[data length] error:error];
+    const unsigned char * const bytes = (const unsigned char *)data.bytes;
+    return [self rowsFromUTF8String:bytes length:data.length error:error];
 }
 
 - (NSArray *)rowsFromString:(NSString *)string
@@ -886,7 +768,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 {
     // TODO: Use an intermediate data buffer for the character encoding conversion.
 
-    return [self rowsFromUTF8String:(const unsigned char *)[string UTF8String]
+    return [self rowsFromUTF8String:(const unsigned char *)string.UTF8String
                              length:[string lengthOfBytesUsingEncoding:NSUTF8StringEncoding]
                               error:error];
 }
@@ -917,17 +799,17 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 @implementation CSVObjectParser
 
-- (id)initWithDialect:(const CSVDialect *)dialect
+- (instancetype)initWithDialect:(const CSVDialect *)dialect
 {
     return [self initWithDialect:dialect objectClass:nil propertyNames:nil];
 }
 
-+ (id)parserWithDialect:(const CSVDialect *)dialect classClass:(Class)objectClass propertyNames:(NSArray *)propertyNames
++ (instancetype)parserWithDialect:(const CSVDialect *)dialect classClass:(Class)objectClass propertyNames:(NSArray *)propertyNames
 {
     return [[self alloc] initWithDialect:dialect objectClass:objectClass propertyNames:propertyNames];
 }
 
-- (id)initWithDialect:(const CSVDialect *)dialect objectClass:(Class)objectClass propertyNames:(NSArray *)propertyNames
+- (instancetype)initWithDialect:(const CSVDialect *)dialect objectClass:(Class)objectClass propertyNames:(NSArray *)propertyNames
 {
     if ((self = [super initWithDialect:dialect]))
     {
@@ -938,13 +820,6 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
     return self;
 }
 
-//- (void)dealloc
-//{
-//    self.objectClass = nil;
-//    self.propertyNames = nil;
-//    [super dealloc];
-//}
-
 #pragma mark Object Parsing
 
 - (BOOL)parseObjectsFromData:(NSData *)data block:(void (^)(id object, BOOL *stop))block
@@ -954,8 +829,8 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (BOOL)parseObjectsFromData:(NSData *)data block:(void (^)(id object, BOOL *stop))block error:(NSError **)error
 {
-    const unsigned char * const bytes = (const unsigned char *)[data bytes];
-    return [self parseObjectsFromUTF8String:bytes length:[data length] block:block error:error];
+    const unsigned char * const bytes = (const unsigned char *)data.bytes;
+    return [self parseObjectsFromUTF8String:bytes length:data.length block:block error:error];
 }
 
 - (BOOL)parseObjectsFromString:(NSString *)string block:(void (^)(id object, BOOL *stop))block
@@ -965,7 +840,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (BOOL)parseObjectsFromString:(NSString *)string block:(void (^)(id object, BOOL *stop))block error:(NSError **)error
 {
-    return [self parseObjectsFromUTF8String:(const unsigned char *)[string UTF8String]
+    return [self parseObjectsFromUTF8String:(const unsigned char *)string.UTF8String
                                      length:[string lengthOfBytesUsingEncoding:NSUTF8StringEncoding]
                                       block:block
                                       error:error];
@@ -1002,7 +877,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
                     object = [[weakSelf.objectClass alloc] init];
                 }
 
-                id key = [mutablePropertyNames objectAtIndex:index];
+                id key = mutablePropertyNames[index];
                 [object setValue:value forKey:key]; // TODO: Cache this selector?
             }
             else
@@ -1040,8 +915,8 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (NSArray *)objectsFromData:(NSData *)data error:(NSError **)error
 {
-    const unsigned char * const bytes = (const unsigned char *)[data bytes];
-    return [self objectsFromUTF8String:bytes length:[data length] error:error];
+    const unsigned char * const bytes = (const unsigned char *)data.bytes;
+    return [self objectsFromUTF8String:bytes length:data.length error:error];
 }
 
 - (NSArray *)objectsFromString:(NSString *)string
@@ -1051,7 +926,7 @@ static int csv_parser_parse_data(CSVParserContext *context, const unsigned char 
 
 - (NSArray *)objectsFromString:(NSString *)string error:(NSError **)error
 {
-    return [self objectsFromUTF8String:(const unsigned char *)[string UTF8String]
+    return [self objectsFromUTF8String:(const unsigned char *)string.UTF8String
                                 length:[string lengthOfBytesUsingEncoding:NSUTF8StringEncoding]
                                  error:error];
 }
